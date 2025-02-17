@@ -23,10 +23,11 @@
         <br><br>
         <label for="dept">Genre</label>
         <select name="genre" id="genre">
-            <option value="1">Fiction</option>
-            <option value="2">Non-fiction</option>
-            <option value="3">Sci-fi</option>
-            <option value="4">Thriller</option>
+            <option value="Nothing Selected">Select</option>
+            <option value="Fiction">Fiction</option>
+            <option value="Non-fiction">Non-fiction</option>
+            <option value="Sci-fi">Sci-fi</option>
+            <option value="Thriller">Thriller</option>
         </select>
 
         <br><br>
@@ -34,8 +35,6 @@
         <button id="retrieve">Retrieve</button>
         <button id="update">Update</button>
         <button id="delete">Delete</button>
-
-
 
 
         <!-- Firebase Configuration -->
@@ -72,6 +71,126 @@
             let retrievebtn = document.getElementById('retrieve');
             let updatebtn = document.getElementById('update');
             let deletebtn = document.getElementById('delete');
+
+
+
+            function Interface(e){
+                let BtnId = e.target.id;
+                const dbref = ref(db);
+                if(BtnId == "retrieve"){
+                    RetData();
+                    return;
+                }
+
+                get(child(dbref, 'BookDetails/' + entryNo.value)).then((snapshot)=>{
+                    if(snapshot.exists()){
+                        if(BtnId == "add"){
+                            alert('Data already exists, duplicate records not allowed');
+                        }
+                        else if(BtnId == "update"){
+                            UpdateData();
+                            return;
+                        }
+
+                        else if(BtnId == "delete"){
+                            DeleteData();
+                        }
+                    }
+
+                    else {
+                        if(BtnId == "add"){
+                            AddData();
+
+                        }
+                        else if(BtnId == "update"){
+                            alert('Data does not exist, cannot update');
+                        }
+                        else if(BtnId == "delete"){
+                            alert('Data does not exist, cannot delete');
+                        }
+                    }
+                })
+                .catch((error) =>{
+                    alert('unsuccessful');
+                    console.log(error); 
+                })
+            }
+
+            function  AddData(){
+                set(ref(db, 'BookDetails/' +  entryNo.value),{
+                    entryNo : Number(entryNo.value),
+                    srNo: Number(srNo.value),
+                    title: title.value,
+                    author: author.value,
+                    genre: genre.value
+                }).then(()=>{
+                    alert("Data added succcessfully!");
+                }).catch((error)=>{
+                    alert("Unsuccessful");
+                    console.log(error);
+                    
+                })
+            }
+
+
+            function RetData(){
+                const dbref = ref(db);
+
+                get(child(dbref, 'BookDetails/' + entryNo.value)).then((snapshot) =>{
+                    if(snapshot.exists()){
+                        srNo.value = snapshot.val().srNo;
+                        title.value = snapshot.val().title;
+                        author.value = snapshot.val().author;
+                        genre.value = snapshot.val().genre;
+
+                    }
+
+                    else {
+                        alert("No data found");
+                        console.log('no data found');
+                        
+                    }
+
+                })
+                .catch((error) => {
+                    console.log(error);
+                    alert("Unsuccessful");
+                })
+            }
+
+            function UpdateData(){
+                update(ref(db, 'BookDetails/' + entryNo.value), {
+                    srNo: srNo.value,
+                    title : title.value,
+                    author : author.value,
+                    genre : genre.value
+                }).then(()=>{
+                    alert("Data updated successfully");
+                })
+                .catch((error)=>{
+                    alert("Unsuccessful");
+                    console.log(error);
+                    
+                })
+            }
+
+            function DeleteData(){
+                remove(ref(db, 'BookDetails/' + entryNo.value)).then(()=>{
+                    alert('Data deleted successfully!');
+                })
+                .catch((error)=>{
+                    alert('Unsuccessful');
+                    console.log(error);
+                })
+            }
+
+
+
+
+            addbtn.addEventListener('click', Interface);
+            retrievebtn.addEventListener('click', Interface);
+            updatebtn.addEventListener('click', Interface);
+            deletebtn.addEventListener('click', Interface);
           </script>
 
     </body>
